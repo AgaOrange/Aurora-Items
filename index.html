@@ -75,6 +75,7 @@ table{width:100%;border-collapse:collapse;font-variant-numeric:lining-nums tabul
 th {font-family:"Alegreya SC",Georgia,serif;font-weight:500;font-size:15px;text-align:left;padding:10px 8px 6px;border-bottom:1px solid var(--rule2);white-space:nowrap}
 td{padding:8px 8px 9px;border-bottom:1px solid var(--rule);vertical-align:top}
 tr.letter td{font-family:"Alegreya SC",Georgia,serif;font-weight:700;font-size:22px;padding:18px 8px 4px;border-bottom:1px solid var(--rule2)}
+.top{float:right;margin-top:8px;font:400 14px "Alegreya",Georgia,serif;background:none;border:0;padding:0;color:var(--link);cursor:pointer}
 .item a{font-weight:500;text-decoration:none}
 .item a:hover{text-decoration:underline;text-underline-offset:3px}
 tr.banned .item a{text-decoration:line-through;text-decoration-color:var(--red)}
@@ -98,6 +99,7 @@ tr.banned .item a{text-decoration:line-through;text-decoration-color:var(--red)}
 
 /* phones: turn rows into little blocks */
 @media (max-width:760px){
+  #find{position:static} /* too tall to stick on a phone, it covered half the screen */
   thead{display:none}
   table,tbody,tr,td{display:block}
   tbody tr:not(.letter){display:flex;flex-wrap:wrap;gap:2px 12px;padding:10px 0;border-bottom:1px solid var(--rule)}
@@ -272,7 +274,7 @@ function draw() {
       var L = it.name.trim().charAt(0).toUpperCase();
       if (!/[A-Z]/.test(L)) L = "#";
       if (L !== last) {
-        out += '<tr class="letter" data-l="' + L + '"><td colspan="6">' + L + '</td></tr>';
+        out += '<tr class="letter" data-l="' + L + '"><td colspan="6">' + L + '<button type="button" class="top">back to top ↑</button></td></tr>';
         last = L; letters[L] = 1;
       }
     }
@@ -329,10 +331,20 @@ $("rarities").addEventListener("change", function(e){
   else f.rar = f.rar.filter(function(x){ return x != r });
   draw();
 });
+// scroll so the letter lands just under the filter box (it's sticky on bigger screens and was covering the first rows)
+function goTo(y) {
+  window.scrollTo({top: Math.max(0, y), behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"});
+}
 $("jump").addEventListener("click", function(e){
   var l = e.target.getAttribute("data-l");
   var row = l && document.querySelector('tr.letter[data-l="' + l + '"]');
-  if (row) row.scrollIntoView({block:"start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"});
+  if (!row) return;
+  var box = $("find");
+  var cover = getComputedStyle(box).position == "sticky" ? box.offsetHeight : 0;
+  goTo(row.getBoundingClientRect().top + window.pageYOffset - cover - 4);
+});
+$("rows").addEventListener("click", function(e){
+  if (e.target.className == "top") goTo(0);
 });
 $("clearbtn").onclick = function(){
   f = {q:"", book:"all", legal:"all", att:"any", cat:"all", sort:"name", rar:[], rank1:false, freeonly:false, showbanned:false};
