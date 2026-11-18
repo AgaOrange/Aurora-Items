@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try { var th = localStorage.getItem("theme"); if (th) document.documentElement.setAttribute("data-theme", th) } catch (e) {}</script>
 <title>Project Aurora Item Index</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,6 +20,14 @@
   --c-common:#5e5e5e; --c-uncommon:#2f6b3a; --c-rare:#2b4f8f; --c-veryrare:#6b3e8f;
   --c-legendary:#a8561a; --c-artifact:#a02a2a; --c-varies:#5e5e5e;
 }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page:#0c0e11;--glow:#221a42;--paper:#241e19;--paper2:#1a1612;--ink:#eae0ca;--faint:#b5a78f;--head:#e8cd92;--head2:#dcc089;--rule:#40362b;--rule2:#a88e5c;--gold:#9c8352;--link:#ec9384;--red:#ef8a7a;--btn:#9e1b1b;--btntext:#fff;--field:#2d2620;--fieldline:#5e4f3d;--band1:#171130;--band2:#30235c;--bandtext:#e6d9bb;--title:#efca66;
+    --c-common:#ababab;--c-uncommon:#86c792;--c-rare:#94b4ea;--c-veryrare:#c2a1e6;--c-legendary:#eaa56d;--c-artifact:#ef8a7a;--c-varies:#ababab;
+    color-scheme: dark
+  }
+}
+:root[data-theme="dark"]{--page:#0c0e11;--glow:#221a42;--paper:#241e19;--paper2:#1a1612;--ink:#eae0ca;--faint:#b5a78f;--head:#e8cd92;--head2:#dcc089;--rule:#40362b;--rule2:#a88e5c;--gold:#9c8352;--link:#ec9384;--red:#ef8a7a;--btn:#9e1b1b;--btntext:#fff;--field:#2d2620;--fieldline:#5e4f3d;--band1:#171130;--band2:#30235c;--bandtext:#e6d9bb;--title:#efca66; --c-common:#ababab;--c-uncommon:#86c792;--c-rare:#94b4ea;--c-veryrare:#c2a1e6;--c-legendary:#eaa56d;--c-artifact:#ef8a7a;--c-varies:#ababab; color-scheme: dark}
 
 *{box-sizing:border-box}
 body {
@@ -163,11 +172,14 @@ tr.detail .text th,tr.detail .text td{padding:4px 12px 4px 0;white-space:normal;
 #minijump button:disabled{color:var(--rule);cursor:default}
 @media (max-width:760px){#mini{display:none}}
 @media (prefers-reduced-motion:reduce){#mini{transition:none}}
+#themebtn{float:right;margin:2px 0 8px 12px;font:inherit;font-size:14px;color:var(--title);background:none;border:1px solid var(--title);border-radius:3px;padding:2px 10px;cursor:pointer}
+#themebtn:hover{background:rgba(255,255,255,.08)}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
+  <button type="button" id="themebtn">dark mode</button>
   <h1>Project Aurora Item Index</h1>
   <p class="lede">All the magic items from the books we're allowed in Aurora West Marches, with item points and the ban list already sorted out. Click a row to open its details, or click a name to go straight to D&amp;D Beyond.</p>
   <p id="tally"></p>
@@ -524,6 +536,20 @@ $("clearbtn").onclick = function(){
   $("find").reset();
   draw();
 };
+
+// dark/light switch, remembered on this device
+function theme() {
+  return document.documentElement.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+}
+function themeLabel() { $("themebtn").textContent = theme() == "dark" ? "light mode" : "dark mode" }
+$("themebtn").onclick = function(){
+  var th = theme() == "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", th);
+  try { localStorage.setItem("theme", th) } catch (e) {}
+  themeLabel();
+};
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", themeLabel);
+themeLabel();
 
 draw();
 </script>
