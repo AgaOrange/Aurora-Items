@@ -29,7 +29,7 @@ body {
   font-size:16px; line-height:1.45;
 }
 a{color:inherit}
-.wrap {max-width:1120px;margin:28px auto 40px;padding:0 22px 48px;
+.wrap {max-width:1480px;margin:28px auto 40px;padding:0 22px 48px;
   background:radial-gradient(ellipse at 50% 40%, var(--paper) 60%, var(--paper2) 100%);
   border:1px solid #000;box-shadow:5px 13px 20px rgba(0,0,0,.4)}
 
@@ -45,8 +45,7 @@ h1 {
 #tally {margin:10px 0 0;font-size:15px;opacity:.85}
 #tally b{font-weight:700}
 
-/* filter box - sticks to the top when scrolling */
-#find{position:sticky;top:0;z-index:3;background:var(--paper);
+#find{
   display:grid;grid-template-columns:minmax(0,1fr);gap:10px;
   padding:12px 0;border-bottom:2px solid var(--gold)}
 .line{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;min-width:0}
@@ -64,7 +63,7 @@ input[type=checkbox]{accent-color:var(--link);width:15px;height:15px;vertical-al
 .checks label{color:var(--ink);font-weight:400;white-space:nowrap}
 .status{color:var(--faint);font-size:15px}
 .status b {color:var(--ink);font-weight:600}
-#clearbtn{font:inherit;font-size:14px;font-weight:600;background:var(--btn);color:var(--btntext);border:0;border-radius:3px;padding:3px 12px;cursor:pointer;box-shadow:2px 2px 0 rgba(0,0,0,.35)}
+#clearbtn,#miniclear{font:inherit;font-size:14px;font-weight:600;background:var(--btn);color:var(--btntext);border:0;border-radius:3px;padding:3px 12px;cursor:pointer;box-shadow:2px 2px 0 rgba(0,0,0,.35)}
 #jump{display:flex;flex-wrap:wrap;gap:2px 10px;font-family:"Libre Baskerville",Georgia,serif;font-size:15px}
 #jump button{font:inherit;background:none;border:0;padding:0 1px;color:var(--link);cursor:pointer}
 #jump button:disabled{color:var(--rule);cursor:default}
@@ -85,11 +84,13 @@ tr.banned .item a{text-decoration:line-through;text-decoration-color:var(--red)}
 .marks .adv,.marks .ban{color:var(--red)}
 .fp{font-size:14px;color:var(--link)}
 .r {font-weight:700;font-size:15px;color:var(--c)}
-.rar,.pts,.att,.bk{white-space:nowrap}
+.rar,.pts,.att{white-space:nowrap}
 .att .by{display:block;font-size:13.5px;color:var(--faint);white-space:normal;max-width:15ch;line-height:1.3}
 .pts{text-align:right}
 .bk {font-size:14px;color:var(--faint)}
-.tags{font-size:13.5px;color:var(--faint);max-width:28ch}
+.tags{font-size:13.5px;color:var(--faint);width:36%}
+.rar,.pts,.att{width:1%}
+.bk{width:13%;white-space:normal}
 tr.row{cursor:pointer}
 tr.row:hover td,tr.row.isopen td{background:color-mix(in srgb,var(--gold) 14%,transparent)}
 .morecell{width:34px;text-align:right}
@@ -120,11 +121,12 @@ tr.detail .text th,tr.detail .text td{padding:4px 12px 4px 0;white-space:normal;
 @media (max-width:760px){
   .wrap{margin:0;border:0;box-shadow:none;padding:0 14px 40px}
   header{margin:0 -14px 14px;padding:22px 14px 16px}
-  #find{position:static;background:none} /* too tall to stick on a phone, it covered half the screen */
+  #find{background:none}
   thead{display:none}
   table,tbody,tr,td{display:block}
   tbody tr:not(.letter){display:flex;flex-wrap:wrap;gap:2px 12px;padding:10px 0;border-bottom:1px solid var(--rule)}
   td{border:0;padding:0}
+  .rar,.pts,.att,.bk,.tags{width:auto}
   .item,.tags{flex-basis:100%;max-width:none}
   .tags:empty{display:none}
   .pts:before{content:"pts ";color:var(--faint)}
@@ -146,15 +148,21 @@ tr.detail .text th,tr.detail .text td{padding:4px 12px 4px 0;white-space:normal;
   .text th,.text td,.text tbody td{display:table-cell}
 }
 
-/* once you scroll past the filters they shrink to the search, the count and the letters, so open items have room */
-#findtop{height:1px}
-#morefilters{display:none;font:inherit;font-size:14px;background:none;border:0;padding:0;color:var(--link);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-#find.stuck{display:flex;flex-wrap:wrap;align-items:center;gap:6px 22px;padding:8px 0;box-shadow:0 8px 8px -8px rgba(0,0,0,.4)}
-#find.stuck .line:nth-child(2),#find.stuck .line:nth-child(3),#find.stuck .checks,
-#find.stuck #book,#find.stuck #legal,#find.stuck label[for=book],#find.stuck label[for=legal]{display:none}
-#find.stuck #jump{flex-basis:100%}
-#find.stuck #morefilters{display:inline}
-#find.stuck .line:first-child{flex-wrap:nowrap}
+/* little search bar that drops down after you scroll past the filters */
+#mini{position:fixed;top:0;left:0;right:0;z-index:5;max-width:1480px;margin:0 auto;
+  display:flex;flex-wrap:wrap;align-items:center;gap:6px 22px;padding:8px 22px;
+  background:var(--paper);border:1px solid #000;border-top:0;border-bottom:2px solid var(--gold);
+  box-shadow:0 6px 10px -6px rgba(0,0,0,.45);
+  transform:translateY(-110%);transition:transform .15s ease-out}
+#mini.on{transform:none}
+#mini label{color:var(--head2);font-size:15px;font-weight:600}
+#ministatus{color:var(--faint);font-size:15px}
+#morefilters{font:inherit;font-size:14px;background:none;border:0;padding:0;color:var(--link);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#minijump{flex-basis:100%;display:flex;flex-wrap:wrap;gap:2px 10px;font-family:"Libre Baskerville",Georgia,serif;font-size:15px}
+#minijump button{font:inherit;background:none;border:0;padding:0 1px;color:var(--link);cursor:pointer}
+#minijump button:disabled{color:var(--rule);cursor:default}
+@media (max-width:760px){#mini{display:none}}
+@media (prefers-reduced-motion:reduce){#mini{transition:none}}
 </style>
 </head>
 <body>
@@ -165,7 +173,13 @@ tr.detail .text th,tr.detail .text td{padding:4px 12px 4px 0;white-space:normal;
   <p id="tally"></p>
 </header>
 
-<div id="findtop"></div>
+<div id="mini">
+  <label for="q2">Find</label> <input type="search" id="q2" placeholder="name, type or tag">
+  <span id="ministatus"></span>
+  <button type="button" id="miniclear">clear</button>
+  <button type="button" id="morefilters">all filters</button>
+  <div id="minijump"></div>
+</div>
 <form id="find" aria-label="Filter the index">
   <div class="line">
     <label for="q">Find</label> <input type="search" id="q" placeholder="name, type or tag">
@@ -204,7 +218,6 @@ tr.detail .text th,tr.detail .text td{padding:4px 12px 4px 0;white-space:normal;
     </span>
     <span class="status"><b id="shown">0</b> of <b id="total">0</b> shown</span>
     <button type="button" id="clearbtn">clear</button>
-    <button type="button" id="morefilters">all filters</button>
   </div>
   <div id="jump" aria-label="Jump to letter"></div>
 </form>
@@ -342,7 +355,7 @@ function rowHtml(it) {
   var r = RAR[it.rarity] || RAR["Varies"];
   var pts;
   if (it.consumable) pts = "slot";
-  else if (r[2] === null) pts = it.rarity == "Varies" ? "varies" : "–";
+  else if (r[2] === null) pts = it.rarity == "Varies" ? "varies" : "-";
   else pts = r[2];
 
   var m = [];
@@ -361,7 +374,7 @@ function rowHtml(it) {
   h += '</td>';
   h += '<td class="rar"><span class="r" style="--c:var(' + r[1] + ')" title="' + esc(it.rarity) + '">' + r[0] + '</span></td>';
   h += '<td class="pts">' + pts + '</td>';
-  h += '<td class="att">' + (it.att ? "yes" + (it.by ? '<span class="by">' + esc(byText(it.by)) + '</span>' : "") : "–") + '</td>';
+  h += '<td class="att">' + (it.att ? "yes" + (it.by ? '<span class="by">' + esc(byText(it.by)) + '</span>' : "") : "-") + '</td>';
   h += '<td class="bk" title="' + esc(it.srcFull.join(", ")) + '">' + esc(it.src.join(", ")) + '</td>';
   h += '<td class="tags">' + esc(it.tags) + '</td>';
   h += '<td class="morecell"><button type="button" class="more" aria-expanded="' + isOpen + '" aria-label="Details for ' + esc(it.name) + '">' + (isOpen ? "−" : "+") + '</button></td></tr>';
@@ -400,7 +413,7 @@ function draw() {
   for (var i = 0; i < btns.length; i++) btns[i].disabled = !letters[btns[i].getAttribute("data-l")];
 }
 
-// ---- setup ----
+// setup
 (function(){
   var ok = ITEMS.filter(function(i){ return !i.banned });
   var fromBooks = ok.filter(function(i){ return i.legal == "allowed" }).length;
@@ -448,7 +461,7 @@ $("rarities").addEventListener("change", function(e){
   else f.rar = f.rar.filter(function(x){ return x != r });
   draw();
 });
-// scroll so the letter lands just under the filter box (it's sticky on bigger screens and was covering the first rows)
+// scroll so the letter ends up just under the search bar
 function goTo(y) {
   window.scrollTo({top: Math.max(0, y), behavior: "smooth"});
 }
@@ -457,17 +470,35 @@ $("jump").addEventListener("click", function(e){
   var row = l && document.querySelector('tr.letter[data-l="' + l + '"]');
   if (!row) return;
   var box = $("find");
-  var was = box.classList.contains("stuck"); box.classList.add("stuck");
-  var cover = getComputedStyle(box).position == "sticky" ? box.offsetHeight : 0;
-  if (!was) box.classList.remove("stuck");
+  var cover = innerWidth > 760 ? $("mini").offsetHeight : 0;
   goTo(row.getBoundingClientRect().top + window.pageYOffset - cover - 4);
 });
-// shrink the filter box to just the search once it sticks, so opened items have room
+// little search bar (not on phones)
+function miniSync() {
+  $("ministatus").textContent = $("shown").textContent + " of " + $("total").textContent + " shown";
+  $("minijump").innerHTML = $("jump").innerHTML;
+  if (document.activeElement != $("q2")) $("q2").value = $("q").value;
+}
+function miniShow(on) {
+  on = on && innerWidth > 760;
+  if (!on && document.activeElement == $("q2")) return; // don't hide it mid-typing
+  if (on) miniSync();
+  $("mini").classList.toggle("on", on);
+  $("mini").inert = !on;
+}
+miniShow(false);
 if ("IntersectionObserver" in window) new IntersectionObserver(function(es){
-  var box = $("find");
-  box.classList.toggle("stuck", !es[0].isIntersecting && getComputedStyle(box).position == "sticky");
-}).observe($("findtop"));
+  miniShow(!es[0].isIntersecting && es[0].boundingClientRect.top < 0);
+}).observe($("find"));
+new MutationObserver(miniSync).observe($("shown"), {childList: true, characterData: true, subtree: true});
+$("q2").addEventListener("input", function(){ $("q").value = this.value; $("q").dispatchEvent(new Event("input")) });
+$("q2").addEventListener("blur", function(){ miniShow($("find").getBoundingClientRect().bottom < 0) });
+$("miniclear").onclick = function(){ $("clearbtn").click(); $("q2").value = "" };
 $("morefilters").onclick = function(){ goTo(0) };
+$("minijump").addEventListener("click", function(e){
+  var l = e.target.getAttribute("data-l"), b = l && $("jump").querySelector('[data-l="' + l + '"]');
+  if (b) b.click();
+});
 $("rows").addEventListener("click", function(e){
   if (e.target.className == "top") return goTo(0);
   if (e.target.closest("a")) return; // the name link still goes to DDB
