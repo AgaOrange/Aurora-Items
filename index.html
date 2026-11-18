@@ -145,6 +145,16 @@ tr.detail .text th,tr.detail .text td{padding:4px 12px 4px 0;white-space:normal;
   .text tbody tr:not(.letter){display:table-row;padding:0;border:0}
   .text th,.text td,.text tbody td{display:table-cell}
 }
+
+/* once you scroll past the filters they shrink to the search, the count and the letters, so open items have room */
+#findtop{height:1px}
+#morefilters{display:none;font:inherit;font-size:14px;background:none;border:0;padding:0;color:var(--link);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#find.stuck{display:flex;flex-wrap:wrap;align-items:center;gap:6px 22px;padding:8px 0;box-shadow:0 8px 8px -8px rgba(0,0,0,.4)}
+#find.stuck .line:nth-child(2),#find.stuck .line:nth-child(3),#find.stuck .checks,
+#find.stuck #book,#find.stuck #legal,#find.stuck label[for=book],#find.stuck label[for=legal]{display:none}
+#find.stuck #jump{flex-basis:100%}
+#find.stuck #morefilters{display:inline}
+#find.stuck .line:first-child{flex-wrap:nowrap}
 </style>
 </head>
 <body>
@@ -155,6 +165,7 @@ tr.detail .text th,tr.detail .text td{padding:4px 12px 4px 0;white-space:normal;
   <p id="tally"></p>
 </header>
 
+<div id="findtop"></div>
 <form id="find" aria-label="Filter the index">
   <div class="line">
     <label for="q">Find</label> <input type="search" id="q" placeholder="name, type or tag">
@@ -193,6 +204,7 @@ tr.detail .text th,tr.detail .text td{padding:4px 12px 4px 0;white-space:normal;
     </span>
     <span class="status"><b id="shown">0</b> of <b id="total">0</b> shown</span>
     <button type="button" id="clearbtn">clear</button>
+    <button type="button" id="morefilters">all filters</button>
   </div>
   <div id="jump" aria-label="Jump to letter"></div>
 </form>
@@ -445,9 +457,17 @@ $("jump").addEventListener("click", function(e){
   var row = l && document.querySelector('tr.letter[data-l="' + l + '"]');
   if (!row) return;
   var box = $("find");
+  var was = box.classList.contains("stuck"); box.classList.add("stuck");
   var cover = getComputedStyle(box).position == "sticky" ? box.offsetHeight : 0;
+  if (!was) box.classList.remove("stuck");
   goTo(row.getBoundingClientRect().top + window.pageYOffset - cover - 4);
 });
+// shrink the filter box to just the search once it sticks, so opened items have room
+if ("IntersectionObserver" in window) new IntersectionObserver(function(es){
+  var box = $("find");
+  box.classList.toggle("stuck", !es[0].isIntersecting && getComputedStyle(box).position == "sticky");
+}).observe($("findtop"));
+$("morefilters").onclick = function(){ goTo(0) };
 $("rows").addEventListener("click", function(e){
   if (e.target.className == "top") return goTo(0);
   if (e.target.closest("a")) return; // the name link still goes to DDB
